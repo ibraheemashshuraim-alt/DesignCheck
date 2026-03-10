@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DesignCheck - Premium AI Critique</title>
+    <link rel="stylesheet" href="style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&family=Outfit:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="background-backdrop"></div>
+
+    <nav class="top-nav">
+        <div class="nav-left">
+            <div class="brand-logo">
+                <div class="logo-icon"><i class="fa-solid fa-check"></i></div>
+                <span class="brand-name">DesignCheck</span>
+                <span class="ai-badge">AI</span>
+            </div>
+            <button class="nav-btn active"><i class="fa-solid fa-border-all"></i> Dashboard</button>
+        </div>
+        <div class="nav-right">
+            <button class="gear-btn-nav" onclick="document.getElementById('apiSettingsModal').classList.remove('hidden')">
+                <i class="fa-solid fa-gear"></i>
+            </button>
+            <div id="authContainer">
+                <button class="btn google-login-btn" id="loginBtn">
+                    <i class="fa-brands fa-google"></i> Continue with Google
+                </button>
+            </div>
+            <button class="btn outline-btn hidden" id="logoutBtn" style="margin-left: 10px; font-size: 0.8rem; padding: 6px 10px;"><i class="fa-solid fa-right-from-bracket"></i></button>
+        </div>
+    </nav>
+
+    <div class="main-wrapper">
+        <header class="hero-header">
+            <h1 class="main-title">Professional Design Analyzer</h1>
+            <p class="subtitle">اپنے ڈیزائن کو AI کی مدد سے بہتر بنائیں</p>
+        </header>
+
+        <section class="bento-grid">
+            <!-- Left Side: Upload / Preview Area -->
+            <div class="bento-card upload-card" id="dropZone">
+                <input type="file" id="fileInput" accept="image/*" hidden>
+
+                <!-- Main Upload Content -->
+                <div class="upload-content" id="uploadContent">
+                    <div class="cloud-icon-container">
+                        <i class="fa-solid fa-cloud cloud-bg"></i>
+                        <i class="fa-solid fa-bolt lightning-fg"></i>
+                    </div>
+                    <h2>اپنا ڈیزائن ڈریگ کر کے یہاں لائیں</h2>
+                    <div class="badges">
+                        <span>PNG</span><span>JPG</span><span>PDF</span>
+                    </div>
+                    <button class="btn browse-btn" onclick="document.getElementById('fileInput').click()">براؤز کریں</button>
+                </div>
+
+                <!-- Preview State (Hidden initially) -->
+                <div class="preview-content hidden" id="previewContent">
+                    <img id="previewImage" src="" alt="Preview">
+                    <div class="scanner-line" id="scannerLine"></div>
+                    <div class="preview-actions hidden" id="previewActions">
+                        <button class="btn outline-btn reset-btn" onclick="resetApp()"><i class="fa-solid fa-rotate-right"></i> نیا ڈیزائن</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: Analysis Results -->
+            <div class="bento-card results-card" id="resultsPanel">
+                <div class="panel-stripe"></div>
+                <div class="panel-header-text" id="panelHeaderText">WAITING FOR DESIGN...</div>
+                
+                <div class="results-blur-overlay" id="resultsOverlay">
+                    <p style="color: var(--text-muted); font-family: 'Outfit', sans-serif;">Upload a design to see analysis</p>
+                </div>
+
+                <div class="results-scroll-area">
+                    <!-- Export Actions Area -->
+                    <div class="export-actions hidden" id="exportActions">
+                        <button class="btn mini-action-btn print-btn" onclick="exportPrint()"><i class="fa-solid fa-print"></i> Print</button>
+                        <button class="btn mini-action-btn png-btn" onclick="exportPNG()"><i class="fa-solid fa-image"></i> Save PNG</button>
+                        <button class="btn mini-action-btn pdf-btn" onclick="exportPDF()"><i class="fa-solid fa-file-pdf"></i> PDF</button>
+                    </div>
+
+                    <!-- Bento Grid Inner: Analytics -->
+                    <div class="bento-inner-grid" id="analyticsGrid">
+                        
+                        <!-- Overall Score -->
+                        <div class="inner-card score-card">
+                            <span class="score-label">Overall Score</span>
+                            <div class="circular-score">
+                                <span class="score-number"><span id="overallScoreText">--</span><span style="font-size:1.2rem; color:#8ba5b0;">/100</span></span>
+                            </div>
+                        </div>
+
+                        <!-- Layout & Space -->
+                        <div class="inner-card layout-card">
+                            <div class="card-header"><i class="fa-solid fa-layer-group"></i> Layout & Space</div>
+                            <div class="data-block">
+                                <label>Visual Flow</label>
+                                <div id="layoutStatusOut" class="ltr-text data-value" style="color:#00f0ff;">Structured</div>
+                            </div>
+                            <div class="ai-tip-box mt-2">
+                                <span class="tip-badge">AI Tip</span>
+                                <p id="spaceTipOut">--</p>
+                            </div>
+                        </div>
+
+                        <!-- Typography -->
+                        <div class="inner-card font-card">
+                            <div class="card-header"><i class="fa-solid fa-font"></i> Typography</div>
+                            <div class="data-block">
+                                <label>Suggested Fonts</label>
+                                <div id="suggestedFontsOut" class="ltr-text data-value">--</div>
+                            </div>
+                            <div class="ai-tip-box mt-2">
+                                <span class="tip-badge">AI Tip</span>
+                                <p id="fontTipOut">--</p>
+                            </div>
+                        </div>
+
+                        <!-- Color Palette -->
+                        <div class="inner-card color-card">
+                            <div class="card-header"><i class="fa-solid fa-palette"></i> Colors</div>
+                            <div class="color-palette-grid" id="colorPaletteOut">
+                                <div style="color:var(--text-muted); font-size:0.8rem;">--</div>
+                            </div>
+                            <div class="ai-tip-box mt-2">
+                                <span class="tip-badge">AI Tip</span>
+                                <p id="colorTipOut">--</p>
+                            </div>
+                        </div>
+
+                        <!-- Contrast & Balance -->
+                        <div class="inner-card access-card">
+                            <div class="card-header"><i class="fa-solid fa-scale-balanced"></i> Contrast & Balance</div>
+                            <div class="data-block">
+                                <label>Visual Balance</label>
+                                <div id="contrastOut" class="ltr-text data-value">--</div>
+                            </div>
+                            <div class="ai-tip-box mt-2">
+                                <span class="tip-badge">AI Tip</span>
+                                <p id="accessTipOut">--</p>
+                            </div>
+                        </div>
+
+                        <!-- Strengths -->
+                        <div class="inner-card strength-card hidden" id="cardGood">
+                            <div class="card-header" style="color: var(--success-green);"><i class="fa-solid fa-circle-check"></i> Strengths</div>
+                            <div id="reportGoodOut" class="chip-container mt-2"></div>
+                        </div>
+
+                        <!-- Weaknesses -->
+                        <div class="inner-card weakness-card hidden" id="cardBad">
+                            <div class="card-header" style="color: var(--warning-orange);"><i class="fa-solid fa-circle-exclamation"></i> Weaknesses</div>
+                            <div id="reportBadOut" class="chip-container mt-2"></div>
+                        </div>
+                        
+                        <!-- Advice -->
+                        <div class="inner-card advice-card hidden" id="cardAdvice" style="grid-column: 1 / -1;">
+                            <div class="card-header" style="color: var(--neon-purple);"><i class="fa-solid fa-lightbulb"></i> Advice</div>
+                            <div id="reportAdviceOut" class="chip-container mt-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- API Modal -->
+    <div id="apiSettingsModal" class="modal hidden">
+        <div class="modal-content card">
+            <span class="close-btn" onclick="document.getElementById('apiSettingsModal').classList.add('hidden')">&times;</span>
+            <div class="api-box">
+                <label for="apiKeyInput" style="color:white; font-size:1.2rem; margin-bottom:10px; display:block;"><i class="fa-solid fa-key"></i> Google Gemini API Key</label>
+                <div class="api-input-group" style="display:flex; gap:10px; direction:ltr;">
+                    <input type="password" id="apiKeyInput" placeholder="Paste your API Key here (AIzaSy...)" style="flex:1; padding:10px; border-radius:5px; border:1px solid #28544a; background:#112d4a; color:white;">
+                    <button class="btn outline-btn" id="saveApiKeyBtn" onclick="saveApiKey()">Save</button>
+                    <button class="btn outline-btn hidden" id="editApiKeyBtn" onclick="editApiKey()"><i class="fa-solid fa-pen"></i></button>
+                </div>
+                <p class="api-hint" id="apiHintText" style="margin-top:10px; color:#aaa;">آپ کو کام شروع کرنے کے لیے API Key دینا ہوگی۔</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upgrade Modal -->
+    <div id="upgradeModal" class="modal hidden">
+        <div class="modal-content card" style="text-align: center; border-color: #00f0ff; box-shadow: 0 0 30px rgba(0, 240, 255, 0.2);">
+            <span class="close-btn" onclick="document.getElementById('upgradeModal').classList.add('hidden')">&times;</span>
+            <div style="font-size: 3rem; color: #00f0ff; margin-bottom: 10px;"><i class="fa-solid fa-crown"></i></div>
+            <h2 style="color: white; font-family: 'Outfit', sans-serif; margin-bottom: 15px;">Unlock Premium Features</h2>
+            <p style="color: var(--text-muted); margin-bottom: 20px;">PDF ڈاؤن لوڈ کرنے اور ڈائریکٹ پرنٹ نکالنے کے لیے پریمیم پلان خریدیں۔ اس سے آپ ان لمیٹڈ رپورٹس بنا سکتے ہیں۔</p>
+            <button class="btn browse-btn" style="width: 100%; font-family: 'Outfit', sans-serif; background: linear-gradient(to right, #00f0ff, #0a58ca); border:none;" onclick="mockUpgradePremium()">Upgrade to Pro - $9.99/mo</button>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="modal hidden" style="z-index: 2000;">
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center;">
+            <div class="spinner"></div>
+            <h2 style="color:var(--neon-cyan); font-family:'Outfit'; margin-top:20px;">Analyzing Design...</h2>
+            <p style="color:var(--text-muted);">Please wait while AI processes the layout and colors.</p>
+        </div>
+    </div>
+
+    <footer>
+        <div class="ft-left">Powered by <strong style="color: #00f0ff;">Gemini AI</strong></div>
+        <div class="ft-right">© 2024 DesignCheck SaaS <i class="fa-solid fa-star-of-life" style="color:#4a6568"></i></div>
+    </footer>
+
+    <!-- Firebase App (Compat Library for no-server local running) -->
+    <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore-compat.js"></script>
+    
+    <script>
+      const firebaseConfig = {
+          apiKey: "AIzaSyC7f4QH6CSRN6dAhGNm7P4kMHTv12mtdEo",
+          authDomain: "designcheck-8be9f.firebaseapp.com",
+          projectId: "designcheck-8be9f",
+          storageBucket: "designcheck-8be9f.firebasestorage.app",
+          messagingSenderId: "766391064183",
+          appId: "1:766391064183:web:36c6d4368196e3db2bd872"
+      };
+      
+      try {
+          // Initialize Firebase
+          const app = firebase.initializeApp(firebaseConfig);
+          console.log("Firebase initialized");
+      } catch (e) {
+          console.error("Firebase Initialization Error.", e);
+      }
+    </script>
+
+    <!-- Libraries for Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <!-- Using standard script tag (not module) so it works on file:// -->
+    <script src="app.js"></script>
+</body>
+
+</html>
